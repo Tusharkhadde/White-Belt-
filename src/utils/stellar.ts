@@ -6,6 +6,7 @@ import {
   Asset,
   Networks,
   BASE_FEE,
+  Memo,
 } from '@stellar/stellar-sdk';
 
 const server = new Horizon.Server('https://horizon-testnet.stellar.org');
@@ -13,26 +14,19 @@ const networkPassphrase = Networks.TESTNET;
 
 export async function checkFreighter(): Promise<boolean> {
   try {
-    const result = await freighter.isConnected();
-    return result.isConnected;
+    await freighter.isConnected();
+    return true;
   } catch {
     return false;
   }
 }
 
 export async function connectWallet(): Promise<string> {
-  try {
-    const result = await freighter.requestAccess();
-    if (result.error) {
-      throw new Error(result.error.message || 'Failed to connect');
-    }
-    return result.address;
-  } catch (err: any) {
-    if (err.message?.includes('Freighter') || err.message?.includes('User declined')) {
-      throw err;
-    }
-    throw new Error('Connection cancelled or Freighter is locked.');
+  const result = await freighter.requestAccess();
+  if (result.error) {
+    throw new Error(result.error.message || 'Failed to connect');
   }
+  return result.address;
 }
 
 export async function getXlmBalance(publicKey: string): Promise<string> {
@@ -45,24 +39,27 @@ export async function getXlmBalance(publicKey: string): Promise<string> {
 export async function sendXlm(
   senderPublicKey: string,
   destination: string,
-  amount: string
-): Promise<{ hash: string }> {
+  amount: string,
+  message?: string
+): Promise<{ hash: string; success: boolean }> {
   const senderAccount = await server.loadAccount(senderPublicKey);
 
-  const transaction = new TransactionBuilder(senderAccount, {
+  const txBuilder = new TransactionBuilder(senderAccount, {
     fee: BASE_FEE.toString(),
     networkPassphrase,
-  })
-    .addOperation(
-      Operation.payment({
-        destination,
-        asset: Asset.native(),
-        amount,
-      })
-    )
-    .setTimeout(30)
-    .build();
+  }).addOperation(
+    Operation.payment({
+      destination,
+      asset: Asset.native(),
+      amount,
+    })
+  );
 
+  if (message) {
+    txBuilder.addMemo(Memo.text(message));
+  }
+
+  const transaction = txBuilder.setTimeout(30).build();
   const xdr = transaction.toXDR();
 
   const signedResult = await freighter.signTransaction(xdr, {
@@ -79,5 +76,5 @@ export async function sendXlm(
   );
 
   const result = await server.submitTransaction(signedTx);
-  return { hash: result.hash };
+  return { hash: result.hash, success: result.successful };
 }

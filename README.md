@@ -1,187 +1,88 @@
-# 🚀 Stellar dApp – White Belt
+# Stellar Time Capsule ⏳
 
-A beginner-friendly decentralized application built on the **Stellar Testnet** using **React, TypeScript, and Vite**. This dApp allows users to connect their Freighter wallet, view their XLM balance, and send XLM payments seamlessly on the Stellar network.
+A beautiful Stellar testnet dApp that lets you send XLM sealed in time — locked until a future date you choose.
 
-## ✨ Features
+**Live Demo:** [white-belt-theta.vercel.app](https://white-belt-theta.vercel.app)  
+**GitHub:** [github.com/Tusharkhadde/White-Belt-](https://github.com/Tusharkhadde/White-Belt-)
 
-### 🔗 Wallet Integration
+## Features
 
-* Connect your **Freighter Wallet** in one click
-* Secure wallet authentication
-* Disconnect wallet anytime
+| Requirement | Implementation |
+|-------------|---------------|
+| Wallet Connect/Disconnect | Freighter wallet via `@stellar/freighter-api` |
+| Balance Display | XLM balance fetched from Horizon testnet |
+| Send XLM Transaction | Payment with memo (your secret message) |
+| Transaction Feedback | Success/failure status + transaction hash |
+| Time Capsule UI | Dark theme, countdown timers, glassmorphism cards |
 
-### 💰 Balance Tracking
+## How It Works
 
-* Fetch real-time XLM balance
-* Display wallet address and account information
-* Automatic balance updates after transactions
+1. Connect your Freighter wallet (set to **Testnet**)
+2. Enter recipient address, amount, unlock date, and a secret message
+3. Click **"Seal Time Capsule"** — sends XLM with your message as a memo
+4. Watch the countdown tick down until your capsule unlocks
 
-### 📤 Send XLM Payments
+## Prerequisites
 
-* Transfer XLM to any valid Stellar Testnet account
-* Input validation for recipient addresses
-* Custom payment amounts
+- [Node.js](https://nodejs.org) v18+
+- [Freighter Wallet](https://freighter.app) browser extension (set to **Testnet**)
+- Testnet XLM — get free XLM via [Friendbot](https://friendbot.stellar.org?addr=G...)
 
-### ✅ Transaction Status
-
-* Instant success/error feedback
-* Display transaction hash after submission
-* Improved user experience with clear notifications
-
----
-
-## 🛠 Tech Stack
-
-* React 19
-* TypeScript
-* Vite
-* Stellar SDK
-* Freighter Wallet API
-
----
-
-## 📋 Prerequisites
-
-Before running this project, make sure you have:
-
-* Node.js (v18 or higher)
-* Freighter Wallet browser extension installed
-* Freighter configured to use **Stellar Testnet**
-
----
-
-## 🚀 Getting Started
-
-### Clone the Repository
+## Setup (Run Locally)
 
 ```bash
-git clone <your-repository-url>
-cd stellar-dapp
-```
-
-### Install Dependencies
-
-```bash
+git clone https://github.com/Tusharkhadde/White-Belt-.git
+cd White-Belt-
 npm install
-```
-
-### Start Development Server
-
-```bash
 npm run dev
 ```
 
-Open:
+Open `http://localhost:5173` in your browser.
 
-```text
-http://localhost:5173
-```
-
-in your browser.
-
----
-
-## 💸 Get Testnet XLM
-
-To test transactions, fund your account using Stellar Friendbot:
-
-```text
-https://friendbot.stellar.org?addr=YOUR_PUBLIC_KEY
-```
-
-Or visit the Stellar Laboratory Friendbot page and paste your public key.
-
----
-
-## 📦 Production Build
-
-Create an optimized production build:
+## Deploy
 
 ```bash
 npm run build
 ```
 
-Preview the production build locally:
+Deploy the `dist/` folder to Vercel, Netlify, or any static host.
 
-```bash
-npm run preview
+## Screenshots
+
+*Wallet connected state:*
+![Connected state](screenshots/connected.png)
+
+*Balance displayed:*
+![Balance](screenshots/balance.png)
+
+*Successful testnet transaction:*
+![Transaction sent](screenshots/transaction.png)
+
+*Transaction result shown to user:*
+![Transaction result](screenshots/result.png)
+
+## Tech Stack
+
+- [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vitejs.dev) + [Tailwind CSS v4](https://tailwindcss.com)
+- [shadcn/ui](https://ui.shadcn.com) (Button, Card, Input, Badge, Separator)
+- [@stellar/stellar-sdk](https://github.com/stellar/js-stellar-sdk) — Horizon API
+- [@stellar/freighter-api](https://github.com/stellar/freighter) — Wallet integration
+
+## Project Structure
+
 ```
-
----
-
-## 📂 Project Structure
-
-```text
 src/
+├── App.tsx                      # Main app — layout + state
+├── index.css                    # Tailwind + shadcn theme (dark)
+├── main.tsx                     # Entry point
+├── lib/
+│   └── utils.ts                 # cn() utility
 ├── components/
-│   ├── WalletConnector.tsx
-│   ├── BalanceDisplay.tsx
-│   └── SendPayment.tsx
-│
-├── utils/
-│   └── stellar.ts
-│
-├── App.tsx
-├── App.css
-├── index.css
-└── main.tsx
+│   ├── ui/                      # shadcn UI components
+│   ├── WalletConnector.tsx      # Freighter connect/disconnect
+│   ├── CreateCapsule.tsx        # Time capsule creation form
+│   └── CapsuleList.tsx          # Capsule list with countdowns
+└── utils/
+    └── stellar.ts               # Stellar SDK + Freighter helpers
 ```
-
-### Component Overview
-
-| Component       | Description                              |
-| --------------- | ---------------------------------------- |
-| WalletConnector | Handles Freighter wallet connection      |
-| BalanceDisplay  | Fetches and displays XLM balance         |
-| SendPayment     | Sends XLM transactions                   |
-| stellar.ts      | Stellar SDK and wallet utility functions |
-
----
-
-## 📸 Screenshots
-
-### Wallet Connected
-
-![Connected](./screenshots/connected.png)
-
-### XLM Balance
-
-![Balance](./screenshots/balance.png)
-
-### Send Payment
-
-![Transaction](./screenshots/transaction.png)
-
-### Transaction Result
-
-![Result](./screenshots/result.png)
-
----
-
-## 🎯 Learning Objectives
-
-This project demonstrates:
-
-* Stellar wallet integration
-* Freighter API usage
-* Stellar Testnet transactions
-* React state management
-* TypeScript best practices
-* Blockchain application fundamentals
-
----
-
-## 🔮 Future Improvements
-
-* Transaction history
-* Account creation flow
-* Asset support beyond XLM
-* Wallet auto-reconnect
-* Improved UI/UX
-* Mobile responsiveness
-
----
-
-## 📄 License
-
-This project is built for learning purposes as part of the Stellar White Belt track.
