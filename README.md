@@ -49,10 +49,22 @@ Deploy the `dist/` folder to Vercel, Netlify, or any static host.
 
 ## Screenshots
 
-![Connected wallet](screenshots/screenshot-1.png)
-![Balance after funding](screenshots/screenshot-2.png)
-![Creating a capsule](screenshots/screenshot-3.png)
-![Transaction result](screenshots/screenshot-4.png)
+Connected wallet
+
+<img width="1919" height="962" alt="image" src="https://github.com/user-attachments/assets/60d4b28e-fde1-47aa-af2e-0d6ffec508a9" />
+
+Balance after funding  
+
+<img width="1917" height="999" alt="image" src="https://github.com/user-attachments/assets/1cccd2e6-11f4-469c-b6b1-db4ac2a0fdb6" />
+
+Creating a capsule  
+
+<img width="1051" height="807" alt="image" src="https://github.com/user-attachments/assets/deeca322-9076-423b-a868-7730c0d34246" />
+
+Transaction result 
+
+<img width="1919" height="914" alt="image" src="https://github.com/user-attachments/assets/b2662b88-7cc0-4253-8450-99cff37deedf" />
+
 
 ## Tech Stack
 
