@@ -2,7 +2,7 @@
 
 A beautiful Stellar testnet dApp that lets you send XLM sealed in time — locked until a future date you choose.
 
-**Live Demo:** [white-belt-theta.vercel.app](https://white-belt-theta.vercel.app)  
+**Live Demo:** [stellar-topaz.vercel.app](https://stellar-topaz.vercel.app)  
 **GitHub:** [github.com/Tusharkhadde/White-Belt-](https://github.com/Tusharkhadde/White-Belt-)
 
 ## Features
@@ -49,23 +49,17 @@ Deploy the `dist/` folder to Vercel, Netlify, or any static host.
 
 ## Screenshots
 
-*Wallet connected state:*
-![Connected state](screenshots/connected.png)
-
-*Balance displayed:*
-![Balance](screenshots/balance.png)
-
-*Successful testnet transaction:*
-![Transaction sent](screenshots/transaction.png)
-
-*Transaction result shown to user:*
-![Transaction result](screenshots/result.png)
+![Connected wallet](screenshots/screenshot-1.png)
+![Balance after funding](screenshots/screenshot-2.png)
+![Creating a capsule](screenshots/screenshot-3.png)
+![Transaction result](screenshots/screenshot-4.png)
 
 ## Tech Stack
 
 - [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
 - [Vite](https://vitejs.dev) + [Tailwind CSS v4](https://tailwindcss.com)
 - [shadcn/ui](https://ui.shadcn.com) (Button, Card, Input, Badge, Separator)
+- [GSAP](https://gsap.com) — Entrance animations
 - [@stellar/stellar-sdk](https://github.com/stellar/js-stellar-sdk) — Horizon API
 - [@stellar/freighter-api](https://github.com/stellar/freighter) — Wallet integration
 
@@ -80,6 +74,7 @@ src/
 │   └── utils.ts                 # cn() utility
 ├── components/
 │   ├── ui/                      # shadcn UI components
+│   ├── Starfield.tsx            # Animated star background
 │   ├── WalletConnector.tsx      # Freighter connect/disconnect
 │   ├── CreateCapsule.tsx        # Time capsule creation form
 │   └── CapsuleList.tsx          # Capsule list with countdowns
