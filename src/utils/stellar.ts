@@ -36,6 +36,18 @@ export async function getXlmBalance(publicKey: string): Promise<string> {
   return balance.balance;
 }
 
+export async function fundWithFriendbot(publicKey: string): Promise<string> {
+  const response = await fetch(
+    `https://friendbot.stellar.org?addr=${publicKey}`
+  );
+  const data = await response.json();
+  if (data.hash) {
+    return data.hash;
+  }
+  const detail = data.detail || data.title || 'Funding failed';
+  throw new Error(detail);
+}
+
 export async function sendXlm(
   senderPublicKey: string,
   destination: string,
