@@ -21,7 +21,7 @@ interface Props {
   capsules: Capsule[];
 }
 
-function Countdown({ unlockDate }: { unlockDate: string }) {
+function Countdown({ unlockDate, createdAt }: { unlockDate: string; createdAt: number }) {
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -30,8 +30,11 @@ function Countdown({ unlockDate }: { unlockDate: string }) {
   }, []);
 
   const target = new Date(unlockDate).getTime();
+  const total = Math.max(1, target - createdAt);
+  const elapsed = Math.max(0, now - createdAt);
   const diff = Math.max(0, target - now);
   const unlocked = diff === 0;
+  const progress = Math.min(100, (elapsed / total) * 100);
   const days = Math.floor(diff / 86400000);
   const hours = Math.floor((diff % 86400000) / 3600000);
   const minutes = Math.floor((diff % 3600000) / 60000);
@@ -73,9 +76,7 @@ function Countdown({ unlockDate }: { unlockDate: string }) {
       <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
         <div
           className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-1000"
-          style={{
-            width: `${Math.min(100, ((Date.now() - (target - 86400000)) / 86400000) * 100)}%`,
-          }}
+          style={{ width: `${progress}%` }}
         />
       </div>
     </div>
@@ -110,14 +111,13 @@ export default function CapsuleList({ capsules }: Props) {
           {totalLocked.toFixed(2)} XLM locked
         </Badge>
       </div>
-      {capsules.map((c, i) => (
+      {capsules.map((c) => (
         <Card
           key={c.id}
-          className="capsule-item bg-card/50 backdrop-blur border-primary/10 card-hover capsule-glow"
-          style={{ animationDelay: `${i * 0.1}s` }}
+          className="capsule-item bg-card/50 backdrop-blur border-primary/10 card-hover"
         >
           <CardContent className="p-4 space-y-4">
-            <Countdown unlockDate={c.unlockDate} />
+            <Countdown unlockDate={c.unlockDate} createdAt={c.createdAt} />
             <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
               <div>
                 <span className="text-[10px] uppercase tracking-wider text-foreground/40">To</span>

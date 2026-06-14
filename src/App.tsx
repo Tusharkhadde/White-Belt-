@@ -9,7 +9,6 @@ import CapsuleList from '@/components/CapsuleList';
 import type { Capsule } from '@/components/CapsuleList';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
@@ -115,37 +114,20 @@ function App() {
     <div className="min-h-screen relative">
       <Starfield />
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <div ref={headerRef} className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <div className="relative">
-              <svg className="h-10 w-10 text-primary glow-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold glow-text bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
+      <div className="relative z-10 max-w-lg mx-auto px-4 py-8 space-y-5">
+        <div ref={headerRef} className="text-center space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">
+            <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
               Time Capsule
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            Seal XLM with a message until a future date on the Stellar Testnet
+            </span>
+          </h1>
+          <p className="text-muted-foreground text-xs">
+            Seal XLM with a message on the Stellar Testnet
           </p>
-
-          <div className="flex items-center justify-center gap-2">
-            <Badge variant="outline" className="text-[10px] border-primary/20 text-primary/70">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary mr-1.5 animate-pulse" />
-              Testnet
-            </Badge>
-            {publicKey && balance && (
-              <Badge variant="outline" className="text-[10px] border-green-500/20 text-green-400/70">
-                {(parseFloat(balance)).toFixed(2)} XLM
-              </Badge>
-            )}
-          </div>
         </div>
 
         <Card ref={mainRef} className="bg-card/50 backdrop-blur border-primary/10 glow">
-          <CardContent className="p-5 space-y-4">
+          <CardContent className="p-4 space-y-3">
             <WalletConnector
               publicKey={publicKey}
               onConnect={handleConnect}
@@ -155,9 +137,9 @@ function App() {
             {publicKey && (
               <div className="space-y-3 pt-3 border-t border-border/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">XLM Balance</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl font-bold tabular-nums">
+                  <span className="text-xs text-muted-foreground">XLM Balance</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold tabular-nums">
                       {balance !== null
                         ? `${parseFloat(balance).toFixed(4)} XLM`
                         : <span className="text-sm text-muted-foreground animate-pulse">Fetching...</span>
@@ -168,7 +150,7 @@ function App() {
   className="text-muted-foreground hover:text-foreground transition-colors"
   aria-label="Refresh balance"
 >
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                     </button>
@@ -176,45 +158,32 @@ function App() {
                 </div>
 
                 {(isPoor || balance === '0') && (
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <div>
-                      <p className="text-xs text-amber-400 font-medium">Need testnet XLM?</p>
-                      <p className="text-[11px] text-muted-foreground">Get free XLM from the testnet faucet</p>
-                    </div>
+                  <div className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-xs text-amber-400">Need testnet XLM?</p>
                     <Button
                       onClick={handleFund}
                       disabled={funding}
                       size="sm"
                       variant="outline"
-                      className="border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10"
+                      className="border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 h-7 text-[11px]"
                     >
                       {funding ? (
                         <>
-                          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent mr-1.5" />
+                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-1" />
                           Funding...
                         </>
                       ) : (
-                        <>
-                          <svg className="h-3.5 w-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Get 10,000 XLM
-                        </>
+                        'Get 10,000 XLM'
                       )}
                     </Button>
                   </div>
                 )}
 
                 {capsules.length > 0 && (
-                  <div className="grid grid-cols-2 gap-3 text-center text-xs">
-                    <div className="p-2 rounded-lg bg-secondary/30">
-                      <p className="text-lg font-bold tabular-nums">{capsules.length}</p>
-                      <p className="text-muted-foreground">Capsules</p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-secondary/30">
-                      <p className="text-lg font-bold tabular-nums">{totalLocked.toFixed(2)}</p>
-                      <p className="text-muted-foreground">XLM Locked</p>
-                    </div>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>{capsules.length} capsule{capsules.length !== 1 ? 's' : ''}</span>
+                    <span className="text-border">|</span>
+                    <span>{totalLocked.toFixed(2)} XLM locked</span>
                   </div>
                 )}
               </div>
@@ -241,9 +210,7 @@ function App() {
           </div>
         )}
 
-        <p className="text-center text-[10px] text-muted-foreground/30 pb-8">
-          Stellar Testnet · White Belt Level · Built with GSAP + shadcn/ui
-        </p>
+        <div className="pb-8" />
       </div>
     </div>
   );
