@@ -107,11 +107,11 @@ export default function WalletConnector({ onConnect, onDisconnect, publicKey }: 
           <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.6)]" />
           {publicKey.slice(0, 4)}...{publicKey.slice(-4)}
         </Badge>
-        <button
-          onClick={handleCopy}
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          title="Copy address"
-        >
+<button
+  onClick={handleCopy}
+  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+  aria-label={copied ? 'Copied' : 'Copy address'}
+>
           {copied ? (
             <svg className="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -123,13 +123,13 @@ export default function WalletConnector({ onConnect, onDisconnect, publicKey }: 
             </svg>
           )}
         </button>
-        <a
-          href={`https://stellar.expert/explorer/testnet/account/${publicKey}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-muted-foreground hover:text-primary transition-colors"
-          title="View on StellarExpert"
-        >
+<a
+  href={`https://stellar.expert/explorer/testnet/account/${publicKey}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+  aria-label="View on StellarExpert"
+>
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
           </svg>

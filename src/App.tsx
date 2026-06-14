@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { getXlmBalance, fundWithFriendbot } from '@/utils/stellar';
+import Starfield from '@/components/Starfield';
 import WalletConnector from '@/components/WalletConnector';
 import CreateCapsule from '@/components/CreateCapsule';
 import CapsuleList from '@/components/CapsuleList';
@@ -22,54 +23,6 @@ function loadCapsules(): Capsule[] {
   } catch {
     return [];
   }
-}
-
-function Starfield() {
-  const stars = Array.from({ length: 100 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    size: Math.random() * 2 + 1,
-    duration: Math.random() * 3 + 2,
-    delay: Math.random() * 5,
-  }));
-
-  const shootingStars = Array.from({ length: 3 }, (_, i) => ({
-    id: i,
-    top: `${Math.random() * 30}%`,
-    left: `${Math.random() * 100}%`,
-    delay: Math.random() * 10 + 5,
-  }));
-
-  return (
-    <div className="stars">
-      {stars.map((s) => (
-        <div
-          key={s.id}
-          className="star"
-          style={{
-            left: s.left,
-            top: s.top,
-            width: s.size,
-            height: s.size,
-            '--duration': `${s.duration}s`,
-            '--delay': `${s.delay}s`,
-          } as React.CSSProperties}
-        />
-      ))}
-      {shootingStars.map((s) => (
-        <div
-          key={`shoot-${s.id}`}
-          className="shooting-star"
-          style={{
-            top: s.top,
-            left: s.left,
-            '--delay': `${s.delay}s`,
-          } as React.CSSProperties}
-        />
-      ))}
-    </div>
-  );
 }
 
 function App() {
@@ -210,11 +163,11 @@ function App() {
                         : <span className="text-sm text-muted-foreground animate-pulse">Fetching...</span>
                       }
                     </span>
-                    <button
-                      onClick={fetchBalance}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      title="Refresh balance"
-                    >
+<button
+  onClick={fetchBalance}
+  className="text-muted-foreground hover:text-foreground transition-colors"
+  aria-label="Refresh balance"
+>
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
