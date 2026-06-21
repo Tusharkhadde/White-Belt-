@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Clock, CoinVertical, LockSimple, Alarm, ArrowUpRight } from '@phosphor-icons/react';
+import { Clock, CoinVertical, LockSimple, Alarm } from '@phosphor-icons/react';
 import type { Capsule } from './CapsuleList';
 
 gsap.registerPlugin(useGSAP);
@@ -124,7 +124,6 @@ export default function VaultDashboard({ capsules }: Props) {
   const totalLocked = capsules.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0);
   const unlocked = capsules.filter((c) => new Date(c.unlockDate).getTime() <= Date.now()).length;
   const locked = capsules.length - unlocked;
-  const now = Date.now();
   const avgDuration = capsules.length > 0
     ? capsules.reduce((sum, c) => sum + (new Date(c.unlockDate).getTime() - c.createdAt), 0) / capsules.length
     : 0;

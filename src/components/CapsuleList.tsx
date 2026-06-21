@@ -78,7 +78,7 @@ function Countdown({ unlockDate, createdAt }: { unlockDate: string; createdAt: n
   );
 }
 
-function CapsuleCard({ capsule, index }: { capsule: Capsule; index: number }) {
+function CapsuleCard({ capsule }: { capsule: Capsule }) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
@@ -177,8 +177,8 @@ export default function CapsuleList({ capsules }: Props) {
 
   return (
     <div ref={listRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {capsules.map((c, i) => (
-        <CapsuleCard key={c.id} capsule={c} index={i} />
+      {capsules.map((c) => (
+        <CapsuleCard key={c.id} capsule={c} />
       ))}
     </div>
   );
