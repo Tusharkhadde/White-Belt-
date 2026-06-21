@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { LockKey, PaperPlaneTilt, CheckCircle, WarningCircle } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,9 +31,9 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
 
   useGSAP(() => {
     gsap.from(cardRef.current, {
-      y: 30,
+      y: 20,
       opacity: 0,
-      duration: 0.6,
+      duration: 0.5,
       ease: 'power2.out',
     });
   }, { scope: cardRef });
@@ -59,12 +60,6 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
       };
       onCapsuleCreated(capsule);
 
-      gsap.from(cardRef.current, {
-        scale: 0.98,
-        duration: 0.3,
-        ease: 'power2.out',
-      });
-
       toast.success('Capsule sealed!', {
         description: `${amount} XLM locked until ${new Date(unlockDate).toLocaleDateString()}`,
       });
@@ -83,18 +78,16 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
   };
 
   return (
-    <Card ref={cardRef} className="bg-card/50 backdrop-blur border-primary/10 card-hover">
+    <Card ref={cardRef} className="backdrop-blur-xl bg-card/50 ring-1 ring-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-          </svg>
+        <CardTitle className="text-base flex items-center gap-2 tracking-tight">
+          <LockKey weight="bold" className="size-4 text-primary" />
           Create Time Capsule
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground font-medium">Recipient Address</label>
             <Input
               placeholder="G..."
@@ -102,11 +95,10 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
               onChange={(e) => setRecipient(e.target.value)}
               required
               disabled={loading}
-              className="bg-background/50 transition-all duration-200 focus:ring-2 focus:ring-primary/30"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-medium">Amount (XLM)</label>
               <Input
                 type="number"
@@ -117,10 +109,9 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
                 onChange={(e) => setAmount(e.target.value)}
                 required
                 disabled={loading}
-                className="bg-background/50"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-xs text-muted-foreground font-medium">Unlock Date</label>
               <Input
                 type="datetime-local"
@@ -129,14 +120,13 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
                 min={minDate}
                 required
                 disabled={loading}
-                className="bg-background/50"
               />
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground font-medium">
               Secret Message
-              <span className="font-normal text-[10px] ml-1">(optional, max 28 chars, stored in memo)</span>
+              <span className="font-normal text-[10px] ml-1">optional, max 28 chars</span>
             </label>
             <Input
               placeholder="Your message to the future..."
@@ -144,38 +134,34 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
               onChange={(e) => setMessage(e.target.value)}
               maxLength={28}
               disabled={loading}
-              className="bg-background/50"
             />
           </div>
-          <Button type="submit" disabled={loading} className="w-full gap-2 h-11 text-base">
+          <Button type="submit" disabled={loading} className="w-full gap-2 h-10">
             {loading ? (
               <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                <div className="size-4 rounded-full border-2 border-background/50 border-t-background animate-spin" />
                 Sealing Capsule...
               </>
             ) : (
               <>
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+                <PaperPlaneTilt weight="bold" className="size-4" />
                 Seal Time Capsule
               </>
             )}
           </Button>
         </form>
 
-{error && (
-  <div role="alert" className="mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-            {error}
+        {error && (
+          <div role="alert" className="mt-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-start gap-2">
+            <WarningCircle weight="bold" className="size-4 mt-0.5 shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
-{result?.success && (
-  <div role="status" className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20 space-y-2 animate-in">
-            <p className="text-green-400 font-medium flex items-center gap-2">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        {result?.success && (
+          <div role="status" className="mt-4 p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/10 space-y-2">
+            <p className="text-emerald-400 font-medium flex items-center gap-2 text-sm">
+              <CheckCircle weight="bold" className="size-4" />
               Capsule sealed successfully!
             </p>
             <p className="text-xs text-muted-foreground break-all font-mono">Hash: {result.hash}</p>
@@ -186,7 +172,7 @@ export default function CreateCapsule({ publicKey, onCapsuleCreated, onBalanceRe
               className="text-xs text-primary hover:underline inline-flex items-center gap-1"
             >
               View on StellarExpert
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </a>
