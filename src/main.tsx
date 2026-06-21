@@ -9,13 +9,13 @@ createRoot(document.getElementById('root')!).render(
     <Toaster
       position="bottom-right"
       theme="dark"
-      toastOptions={{
-        style: {
-          background: 'hsl(222.2 84% 4.9%)',
-          border: '1px solid hsl(217.2 32.6% 17.5%)',
-          color: 'hsl(210 40% 98%)',
-        },
-      }}
+        toastOptions={{
+          style: {
+            background: '#18181b',
+            border: '1px solid #27272a',
+            color: '#f4f4f5',
+          },
+        }}
     />
     <App />
   </StrictMode>,
