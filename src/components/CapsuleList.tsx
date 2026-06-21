@@ -3,18 +3,9 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { useEffect, useState } from 'react';
 import { ArrowUpRight, LockSimple, LockSimpleOpen } from '@phosphor-icons/react';
+import type { Capsule } from '@/types';
 
 gsap.registerPlugin(useGSAP);
-
-export interface Capsule {
-  id: string;
-  recipient: string;
-  amount: string;
-  message: string;
-  unlockDate: string;
-  hash: string;
-  createdAt: number;
-}
 
 interface Props {
   capsules: Capsule[];
@@ -102,6 +93,8 @@ function CapsuleCard({ capsule }: { capsule: Capsule }) {
     card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
   }, []);
 
+  const assetLabel = capsule.asset_code || 'XLM';
+
   return (
     <div
       ref={cardRef}
@@ -128,7 +121,7 @@ function CapsuleCard({ capsule }: { capsule: Capsule }) {
         </div>
         <div className="text-right">
           <p className="text-xs text-muted-foreground/60">Amount</p>
-          <p className="text-sm font-semibold tabular-nums tracking-tight">{capsule.amount} XLM</p>
+          <p className="text-sm font-semibold tabular-nums tracking-tight">{capsule.amount} {assetLabel}</p>
         </div>
       </div>
 
