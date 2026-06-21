@@ -12,10 +12,19 @@ import {
 const server = new Horizon.Server('https://horizon-testnet.stellar.org');
 const networkPassphrase = Networks.TESTNET;
 
-export async function checkFreighter(): Promise<boolean> {
+export async function isFreighterInstalled(): Promise<boolean> {
   try {
     await freighter.isConnected();
     return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function isFreighterConnected(): Promise<boolean> {
+  try {
+    const result = await freighter.isConnected();
+    return result?.isConnected ?? false;
   } catch {
     return false;
   }
