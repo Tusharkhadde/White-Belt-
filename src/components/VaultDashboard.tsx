@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Clock, CoinVertical, LockSimple, Alarm } from '@phosphor-icons/react';
-import type { Capsule } from './CapsuleList';
+import { Clock, CoinVertical, LockSimple, Alarm, Coins } from '@phosphor-icons/react';
+import type { Capsule, AssetBalance } from '@/types';
+import ActivityFeed from './ActivityFeed';
+import type { Activity } from '@/types';
 
 gsap.registerPlugin(useGSAP);
 
 interface Props {
   capsules: Capsule[];
+  balances: AssetBalance[];
+  activities: Activity[];
 }
 
-function AnimatedValue({ value, suffix = '' }: { value: number; suffix?: string }) {
+function AnimatedValue({ value, suffix = '', decimals = 2 }: { value: number; suffix?: string; decimals?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [display, setDisplay] = useState('0');
 
@@ -21,9 +25,9 @@ function AnimatedValue({ value, suffix = '' }: { value: number; suffix?: string 
       val: value,
       duration: 1.2,
       ease: 'power3.out',
-      onUpdate: () => setDisplay(obj.val.toFixed(2)),
+      onUpdate: () => setDisplay(obj.val.toFixed(decimals)),
     });
-  }, [value]);
+  }, [value, decimals]);
 
   return (
     <span ref={ref} className="tabular-nums tracking-tight">
@@ -38,12 +42,14 @@ function StatCard({
   value,
   suffix,
   gradient,
+  decimals = 2,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number;
   suffix?: string;
   gradient: string;
+  decimals?: number;
 }) {
   return (
     <div className="rounded-xl bg-card/30 backdrop-blur-xl ring-1 ring-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 space-y-3 transition-all duration-300 hover:ring-white/[0.10] hover:bg-card/40">
@@ -54,7 +60,46 @@ function StatCard({
         </div>
       </div>
       <div className="text-2xl font-semibold">
-        <AnimatedValue value={value} suffix={suffix} />
+        <AnimatedValue value={value} suffix={suffix} decimals={decimals} />
+      </div>
+    </div>
+  );
+}
+
+function AssetBreakdown({ balances }: { balances: AssetBalance[] }) {
+  const nonNative = balances.filter((b) => b.asset_type !== 'native' && parseFloat(b.balance) > 0);
+  const xlmBalance = balances.find((b) => b.asset_type === 'native');
+
+  if (nonNative.length === 0 && (!xlmBalance || parseFloat(xlmBalance.balance) === 0)) return null;
+
+  return (
+    <div className="rounded-xl bg-card/30 backdrop-blur-xl ring-1 ring-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 space-y-3 transition-all duration-300 hover:ring-white/[0.10] hover:bg-card/40 col-span-full">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground/60 font-medium tracking-wide uppercase">
+        <Coins weight="bold" className="size-3.5" />
+        Portfolio
+      </div>
+      <div className="space-y-2">
+        {xlmBalance && parseFloat(xlmBalance.balance) > 0 && (
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div className="size-2 rounded-full bg-emerald-400" />
+              <span className="font-medium">XLM</span>
+            </div>
+            <span className="tabular-nums text-muted-foreground">{parseFloat(xlmBalance.balance).toFixed(4)}</span>
+          </div>
+        )}
+        {nonNative.map((b) => (
+          <div key={b.asset_code} className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div className="size-2 rounded-full bg-blue-400" />
+              <span className="font-medium">{b.asset_code}</span>
+              <span className="text-[10px] text-muted-foreground/50 font-mono">
+                {b.asset_issuer?.slice(0, 6)}...
+              </span>
+            </div>
+            <span className="tabular-nums text-muted-foreground">{parseFloat(b.balance).toFixed(2)}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -83,7 +128,7 @@ function NextUnlockCard({ capsules }: { capsules: Capsule[] }) {
       <div className="flex items-end justify-between gap-4">
         <div className="space-y-1">
           <p className="text-lg font-semibold tabular-nums tracking-tight">
-            {next.amount} XLM
+            {next.amount} {next.asset_code || 'XLM'}
           </p>
           <p className="text-sm text-muted-foreground/70 font-mono">
             {next.recipient.slice(0, 6)}...{next.recipient.slice(-4)}
@@ -105,7 +150,7 @@ function NextUnlockCard({ capsules }: { capsules: Capsule[] }) {
   );
 }
 
-export default function VaultDashboard({ capsules }: Props) {
+export default function VaultDashboard({ capsules, balances, activities }: Props) {
   const gridRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -139,6 +184,7 @@ export default function VaultDashboard({ capsules }: Props) {
             value={totalLocked}
             suffix=" XLM"
             gradient="ring-emerald-500/20 bg-emerald-500/5"
+            decimals={2}
           />
         </div>
         <div className="stat-card">
@@ -147,6 +193,7 @@ export default function VaultDashboard({ capsules }: Props) {
             label="Active Capsules"
             value={locked}
             gradient="ring-blue-500/20 bg-blue-500/5"
+            decimals={0}
           />
         </div>
         <div className="stat-card">
@@ -155,6 +202,7 @@ export default function VaultDashboard({ capsules }: Props) {
             label="Unlocked"
             value={unlocked}
             gradient="ring-amber-500/20 bg-amber-500/5"
+            decimals={0}
           />
         </div>
         <div className="stat-card">
@@ -164,11 +212,17 @@ export default function VaultDashboard({ capsules }: Props) {
             value={avgDays}
             suffix=" days"
             gradient="ring-purple-500/20 bg-purple-500/5"
+            decimals={0}
           />
         </div>
       </div>
 
-      {capsules.length > 1 && <NextUnlockCard capsules={capsules} />}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <AssetBreakdown balances={balances} />
+        {capsules.length > 1 && <NextUnlockCard capsules={capsules} />}
+      </div>
+
+      <ActivityFeed activities={activities} />
     </div>
   );
 }
