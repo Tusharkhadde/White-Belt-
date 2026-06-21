@@ -12,6 +12,13 @@ import {
 const server = new Horizon.Server('https://horizon-testnet.stellar.org');
 const networkPassphrase = Networks.TESTNET;
 
+export interface AssetBalance {
+  asset_type: string;
+  asset_code?: string;
+  asset_issuer?: string;
+  balance: string;
+}
+
 export async function isFreighterInstalled(): Promise<boolean> {
   try {
     await freighter.isConnected();
@@ -38,11 +45,15 @@ export async function connectWallet(): Promise<string> {
   return result.address;
 }
 
-export async function getXlmBalance(publicKey: string): Promise<string> {
+export async function getAllBalances(publicKey: string): Promise<AssetBalance[]> {
   const account = await server.loadAccount(publicKey);
-  const balance = account.balances.find((b: any) => b.asset_type === 'native');
-  if (!balance) return '0';
-  return balance.balance;
+  return account.balances as AssetBalance[];
+}
+
+export async function getXlmBalance(publicKey: string): Promise<string> {
+  const balances = await getAllBalances(publicKey);
+  const balance = balances.find((b) => b.asset_type === 'native');
+  return balance?.balance ?? '0';
 }
 
 export async function fundWithFriendbot(publicKey: string): Promise<string> {
@@ -61,9 +72,15 @@ export async function sendXlm(
   senderPublicKey: string,
   destination: string,
   amount: string,
-  message?: string
+  message?: string,
+  assetCode?: string,
+  assetIssuer?: string
 ): Promise<{ hash: string; success: boolean }> {
   const senderAccount = await server.loadAccount(senderPublicKey);
+
+  const asset = assetCode && assetIssuer
+    ? new Asset(assetCode, assetIssuer)
+    : Asset.native();
 
   const txBuilder = new TransactionBuilder(senderAccount, {
     fee: BASE_FEE.toString(),
@@ -71,7 +88,7 @@ export async function sendXlm(
   }).addOperation(
     Operation.payment({
       destination,
-      asset: Asset.native(),
+      asset,
       amount,
     })
   );
