@@ -2,55 +2,47 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { LockKey } from '@phosphor-icons/react';
-import { getXlmBalance, fundWithFriendbot } from '@/utils/stellar';
+import { getAllBalances, fundWithFriendbot } from '@/utils/stellar';
+import type { AssetBalance } from '@/utils/stellar';
 import Starfield from '@/components/Starfield';
 import WalletConnector from '@/components/WalletConnector';
 import CreateCapsule from '@/components/CreateCapsule';
 import VaultDashboard from '@/components/VaultDashboard';
 import CapsuleList from '@/components/CapsuleList';
-import type { Capsule } from '@/components/CapsuleList';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import type { Capsule, Activity } from '@/types';
+import { CAPSULE_STORAGE_KEY, loadCapsules, loadActivities, addActivity } from '@/types';
 
 gsap.registerPlugin(useGSAP);
 
-const STORAGE_KEY = 'stellar-capsules';
-
-function loadCapsules(): Capsule[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
 function App() {
   const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [balance, setBalance] = useState<string | null>(null);
+  const [balances, setBalances] = useState<AssetBalance[]>([]);
   const [funding, setFunding] = useState(false);
   const [capsules, setCapsules] = useState<Capsule[]>(loadCapsules);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const headerRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
 
-  const fetchBalance = useCallback(async () => {
+  const fetchBalances = useCallback(async () => {
     if (!publicKey) return;
     try {
-      const bal = await getXlmBalance(publicKey);
-      setBalance(bal);
-      return bal;
+      const b = await getAllBalances(publicKey);
+      setBalances(b);
     } catch {
-      setBalance(null);
-      return null;
+      setBalances([]);
     }
   }, [publicKey]);
 
   useEffect(() => {
-    fetchBalance();
-  }, [fetchBalance]);
+    fetchBalances();
+    setActivities(loadActivities());
+  }, [fetchBalances]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(capsules));
+    localStorage.setItem(CAPSULE_STORAGE_KEY, JSON.stringify(capsules));
   }, [capsules]);
 
   useGSAP(() => {
@@ -76,15 +68,31 @@ function App() {
 
   const handleConnect = (pk: string) => {
     setPublicKey(pk);
+    const activity: Activity = {
+      id: `act-${Date.now()}`,
+      type: 'wallet_connected',
+      description: `Wallet connected: ${pk.slice(0, 4)}...${pk.slice(-4)}`,
+      timestamp: Date.now(),
+    };
+    setActivities(addActivity(activity));
   };
 
   const handleDisconnect = () => {
     setPublicKey(null);
-    setBalance(null);
+    setBalances([]);
   };
 
   const handleCapsuleCreated = (capsule: Capsule) => {
     setCapsules((prev) => [capsule, ...prev]);
+    const activity: Activity = {
+      id: `act-${Date.now()}`,
+      type: 'capsule_sealed',
+      description: `${capsule.amount} ${capsule.asset_code || 'XLM'} sealed → ${capsule.recipient.slice(0, 4)}...${capsule.recipient.slice(-4)}`,
+      amount: capsule.amount,
+      asset: capsule.asset_code || 'XLM',
+      timestamp: Date.now(),
+    };
+    setActivities(addActivity(activity));
   };
 
   const handleFund = async () => {
@@ -92,10 +100,19 @@ function App() {
     setFunding(true);
     try {
       const hash = await fundWithFriendbot(publicKey);
+      await fetchBalances();
+      const activity: Activity = {
+        id: `act-${Date.now()}`,
+        type: 'funded',
+        description: 'Account funded with 10,000 XLM',
+        amount: '10000',
+        asset: 'XLM',
+        timestamp: Date.now(),
+      };
+      setActivities(addActivity(activity));
       toast.success('Funded with 10,000 XLM!', {
         description: `Hash: ${hash.slice(0, 16)}...`,
       });
-      await fetchBalance();
     } catch (err: any) {
       if (err.message?.includes('already exists') || err.message?.includes('exists')) {
         toast.error('Already funded');
@@ -107,6 +124,7 @@ function App() {
     }
   };
 
+  const balance = balances.find((b) => b.asset_type === 'native')?.balance ?? null;
   const hasBalance = balance !== null && parseFloat(balance) > 0;
   const isPoor = balance !== null && parseFloat(balance) < 1;
 
@@ -125,7 +143,7 @@ function App() {
                 <h1 className="text-2xl font-semibold tracking-tight">Stellar Vault</h1>
               </div>
               <p className="text-sm text-muted-foreground pl-12">
-                Time-locked XLM capsules on the Stellar testnet
+                Multi-asset time-locked capsules on the Stellar testnet
               </p>
             </div>
           </div>
@@ -154,7 +172,7 @@ function App() {
                             }
                           </span>
                           <button
-                            onClick={fetchBalance}
+                            onClick={fetchBalances}
                             className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
                             aria-label="Refresh balance"
                           >
@@ -197,13 +215,20 @@ function App() {
                 </CardContent>
               </Card>
 
-              {publicKey && <CreateCapsule publicKey={publicKey} onCapsuleCreated={handleCapsuleCreated} onBalanceRefresh={fetchBalance} />}
+              {publicKey && (
+                <CreateCapsule
+                  publicKey={publicKey}
+                  onCapsuleCreated={handleCapsuleCreated}
+                  onBalanceRefresh={fetchBalances}
+                  balances={balances}
+                />
+              )}
             </div>
 
             <div className="min-w-0 space-y-6">
               {publicKey && capsules.length > 0 && (
                 <>
-                  <VaultDashboard capsules={capsules} />
+                  <VaultDashboard capsules={capsules} balances={balances} activities={activities} />
                   <CapsuleList capsules={capsules} />
                 </>
               )}
@@ -215,7 +240,7 @@ function App() {
                   </div>
                   <p className="text-sm text-muted-foreground mb-1">No time capsules yet</p>
                   <p className="text-xs text-muted-foreground/50 max-w-xs">
-                    Create your first capsule to seal XLM with a message for the future
+                    Create your first capsule to seal assets with a message for the future
                   </p>
                 </div>
               )}
