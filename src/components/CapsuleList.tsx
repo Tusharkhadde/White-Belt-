@@ -1,9 +1,8 @@
-import { useRef } from 'react';
+import { useRef, useCallback, type MouseEvent } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useEffect, useState } from 'react';
+import { ArrowUpRight, LockSimple, LockSimpleOpen } from '@phosphor-icons/react';
 
 gsap.registerPlugin(useGSAP);
 
@@ -42,42 +41,117 @@ function Countdown({ unlockDate, createdAt }: { unlockDate: string; createdAt: n
 
   if (unlocked) {
     return (
-      <div className="text-center py-2">
-        <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-500 hover:to-orange-500 text-white border-0 text-xs px-3 py-1">
-          <svg className="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-          </svg>
-          Unlocked
-        </Badge>
+      <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-medium">
+        <LockSimpleOpen weight="bold" className="size-3.5" />
+        Unlocked
       </div>
     );
   }
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2 justify-center">
+      <div className="flex gap-1 items-baseline">
         {[
-          { val: days, label: 'days' },
-          { val: hours, label: 'hrs' },
-          { val: minutes, label: 'min' },
-          { val: seconds, label: 'sec' },
+          { val: days, label: 'd' },
+          { val: hours, label: 'h' },
+          { val: minutes, label: 'm' },
+          { val: seconds, label: 's' },
         ].map((unit, i) => (
-          <div key={unit.label} className="flex items-center gap-2">
+          <div key={unit.label} className="flex items-center gap-1">
             <div className="text-center">
-              <div className="text-xl sm:text-2xl font-bold font-mono tabular-nums bg-secondary/50 rounded-lg px-2 py-1 min-w-[3rem]">
+              <div className="text-lg font-semibold font-mono tabular-nums tracking-tight">
                 {String(unit.val).padStart(2, '0')}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider">{unit.label}</div>
+              <div className="text-[9px] text-muted-foreground/60 uppercase tracking-widest">{unit.label}</div>
             </div>
-            {i < 3 && <span className="text-lg text-muted-foreground/50 mb-4">:</span>}
+            {i < 3 && <span className="text-xs text-muted-foreground/30 mb-2">:</span>}
           </div>
         ))}
       </div>
-      <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+      <div className="h-1 rounded-full bg-muted/50 overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-1000"
+          className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-1000 ease-out"
           style={{ width: `${progress}%` }}
         />
+      </div>
+    </div>
+  );
+}
+
+function CapsuleCard({ capsule, index }: { capsule: Capsule; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -6;
+    const rotateY = ((x - centerX) / centerX) * 6;
+    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
+    card.style.setProperty('--spotlight-x', `${(x / rect.width) * 100}%`);
+    card.style.setProperty('--spotlight-y', `${(y / rect.height) * 100}%`);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = 'perspective(600px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className="capsule-item rounded-xl bg-card/30 backdrop-blur-xl ring-1 ring-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 space-y-4 transition-all duration-200 ease-out will-change-transform relative overflow-hidden group"
+      style={{ transformStyle: 'preserve-3d' }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div
+        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(600px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(16,185,129,0.08), transparent 40%)`,
+        }}
+      />
+      <div className="flex items-start justify-between gap-3 relative" style={{ transform: 'translateZ(20px)' }}>
+        <div className="flex items-center gap-2">
+          <div className="size-8 rounded-lg bg-primary/5 flex items-center justify-center ring-1 ring-primary/10">
+            <LockSimple weight="bold" className="size-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground/60">To</p>
+            <p className="text-sm font-mono tracking-tight">{capsule.recipient.slice(0, 6)}...{capsule.recipient.slice(-4)}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-muted-foreground/60">Amount</p>
+          <p className="text-sm font-semibold tabular-nums tracking-tight">{capsule.amount} XLM</p>
+        </div>
+      </div>
+
+      <div className="relative" style={{ transform: 'translateZ(20px)' }}>
+        <Countdown unlockDate={capsule.unlockDate} createdAt={capsule.createdAt} />
+      </div>
+
+      {capsule.message && (
+        <div className="text-xs text-muted-foreground/70 italic leading-relaxed border-t border-border/30 pt-3 relative" style={{ transform: 'translateZ(20px)' }}>
+          &ldquo;{capsule.message}&rdquo;
+        </div>
+      )}
+
+      <div className="border-t border-border/30 pt-3 flex items-center justify-between relative" style={{ transform: 'translateZ(20px)' }}>
+        <a
+          href={`https://stellar.expert/explorer/testnet/tx/${capsule.hash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[11px] text-muted-foreground hover:text-primary transition-colors font-mono inline-flex items-center gap-1"
+        >
+          {capsule.hash.slice(0, 12)}...
+          <ArrowUpRight weight="bold" className="size-3" />
+        </a>
       </div>
     </div>
   );
@@ -90,65 +164,21 @@ export default function CapsuleList({ capsules }: Props) {
     const items = listRef.current?.querySelectorAll('.capsule-item');
     if (items) {
       gsap.from(items, {
-        y: 30,
+        y: 24,
         opacity: 0,
         duration: 0.5,
-        stagger: 0.1,
-        ease: 'power2.out',
+        stagger: 0.06,
+        ease: 'power3.out',
       });
     }
   }, { dependencies: [capsules.length], scope: listRef });
 
   if (capsules.length === 0) return null;
 
-  const totalLocked = capsules.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0);
-
   return (
-    <div ref={listRef} className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Time Capsules</h3>
-        <Badge variant="outline" className="text-xs">
-          {totalLocked.toFixed(2)} XLM locked
-        </Badge>
-      </div>
-      {capsules.map((c) => (
-        <Card
-          key={c.id}
-          className="capsule-item bg-card/50 backdrop-blur border-primary/10 card-hover"
-        >
-          <CardContent className="p-4 space-y-4">
-            <Countdown unlockDate={c.unlockDate} createdAt={c.createdAt} />
-            <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-              <div>
-                <span className="text-[10px] uppercase tracking-wider text-foreground/40">To</span>
-                <p className="font-mono mt-0.5">{c.recipient.slice(0, 6)}...{c.recipient.slice(-4)}</p>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase tracking-wider text-foreground/40">Amount</span>
-                <p className="font-mono mt-0.5 text-foreground/80">{c.amount} XLM</p>
-              </div>
-              {c.message && (
-                <div className="col-span-2">
-                  <span className="text-[10px] uppercase tracking-wider text-foreground/40">Message</span>
-                  <p className="mt-0.5 text-foreground/70 italic">"{c.message}"</p>
-                </div>
-              )}
-              <div className="col-span-2 pt-1 border-t border-border/30">
-                <a
-                  href={`https://stellar.expert/explorer/testnet/tx/${c.hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline inline-flex items-center gap-1 font-mono text-[11px]"
-                >
-                  {c.hash.slice(0, 16)}...
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div ref={listRef} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {capsules.map((c, i) => (
+        <CapsuleCard key={c.id} capsule={c} index={i} />
       ))}
     </div>
   );
