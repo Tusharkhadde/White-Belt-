@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { LockKey } from '@phosphor-icons/react';
 import { getXlmBalance, fundWithFriendbot } from '@/utils/stellar';
 import Starfield from '@/components/Starfield';
 import WalletConnector from '@/components/WalletConnector';
 import CreateCapsule from '@/components/CreateCapsule';
+import VaultDashboard from '@/components/VaultDashboard';
 import CapsuleList from '@/components/CapsuleList';
 import type { Capsule } from '@/components/CapsuleList';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
 gsap.registerPlugin(useGSAP);
@@ -54,7 +55,7 @@ function App() {
 
   useGSAP(() => {
     gsap.from(headerRef.current, {
-      y: -30,
+      y: -20,
       opacity: 0,
       duration: 0.8,
       ease: 'power3.out',
@@ -64,10 +65,10 @@ function App() {
   useGSAP(() => {
     if (publicKey) {
       gsap.from(mainRef.current, {
-        y: 40,
+        y: 30,
         opacity: 0,
         duration: 0.6,
-        delay: 0.2,
+        delay: 0.15,
         ease: 'power2.out',
       });
     }
@@ -106,111 +107,121 @@ function App() {
     }
   };
 
-  const totalLocked = capsules.reduce((sum, c) => sum + parseFloat(c.amount || '0'), 0);
   const hasBalance = balance !== null && parseFloat(balance) > 0;
   const isPoor = balance !== null && parseFloat(balance) < 1;
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-[100dvh] relative">
       <Starfield />
 
-      <div className="relative z-10 max-w-lg mx-auto px-4 py-8 space-y-5">
-        <div ref={headerRef} className="text-center space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">
-              Time Capsule
-            </span>
-          </h1>
-          <p className="text-muted-foreground text-xs">
-            Seal XLM with a message on the Stellar Testnet
-          </p>
+      <div className="relative z-10">
+        <div ref={headerRef} className="border-b border-border/40">
+          <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                  <LockKey weight="bold" className="size-5 text-primary" />
+                </div>
+                <h1 className="text-2xl font-semibold tracking-tight">Stellar Vault</h1>
+              </div>
+              <p className="text-sm text-muted-foreground pl-12">
+                Time-locked XLM capsules on the Stellar testnet
+              </p>
+            </div>
+          </div>
         </div>
 
-        <Card ref={mainRef} className="bg-card/50 backdrop-blur border-primary/10 glow">
-          <CardContent className="p-4 space-y-3">
-            <WalletConnector
-              publicKey={publicKey}
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-            />
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-8 items-start">
+            <div ref={mainRef} className="space-y-5">
+              <Card className="backdrop-blur-xl bg-card/50 ring-1 ring-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                <CardContent className="p-5 space-y-4">
+                  <WalletConnector
+                    publicKey={publicKey}
+                    onConnect={handleConnect}
+                    onDisconnect={handleDisconnect}
+                  />
 
-            {publicKey && (
-              <div className="space-y-3 pt-3 border-t border-border/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">XLM Balance</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold tabular-nums">
-                      {balance !== null
-                        ? `${parseFloat(balance).toFixed(4)} XLM`
-                        : <span className="text-sm text-muted-foreground animate-pulse">Fetching...</span>
-                      }
-                    </span>
-<button
-  onClick={fetchBalance}
-  className="text-muted-foreground hover:text-foreground transition-colors"
-  aria-label="Refresh balance"
->
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+                  {publicKey && (
+                    <div className="space-y-4 pt-4 border-t border-border/50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground font-medium tracking-wide uppercase">XLM Balance</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-semibold tabular-nums tracking-tight">
+                            {balance !== null
+                              ? `${parseFloat(balance).toFixed(4)} XLM`
+                              : <span className="text-sm text-muted-foreground">Fetching...</span>
+                            }
+                          </span>
+                          <button
+                            onClick={fetchBalance}
+                            className="size-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                            aria-label="Refresh balance"
+                          >
+                            <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
 
-                {(isPoor || balance === '0') && (
-                  <div className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                    <p className="text-xs text-amber-400">Need testnet XLM?</p>
-                    <Button
-                      onClick={handleFund}
-                      disabled={funding}
-                      size="sm"
-                      variant="outline"
-                      className="border-amber-500/30 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 h-7 text-[11px]"
-                    >
-                      {funding ? (
-                        <>
-                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-1" />
-                          Funding...
-                        </>
-                      ) : (
-                        'Get 10,000 XLM'
+                      {isPoor && (
+                        <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
+                          <p className="text-xs text-amber-400/80">Need testnet XLM?</p>
+                          <Button
+                            onClick={handleFund}
+                            disabled={funding}
+                            size="sm"
+                            variant="outline"
+                            className="border-amber-500/20 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 h-7 text-[11px]"
+                          >
+                            {funding ? (
+                              <>
+                                <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent mr-1" />
+                                Funding...
+                              </>
+                            ) : (
+                              'Get 10,000 XLM'
+                            )}
+                          </Button>
+                        </div>
                       )}
-                    </Button>
+
+                      {capsules.length > 0 && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>{capsules.length} capsule{capsules.length !== 1 ? 's' : ''}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {publicKey && <CreateCapsule publicKey={publicKey} onCapsuleCreated={handleCapsuleCreated} onBalanceRefresh={fetchBalance} />}
+            </div>
+
+            <div className="min-w-0 space-y-6">
+              {publicKey && capsules.length > 0 && (
+                <>
+                  <VaultDashboard capsules={capsules} />
+                  <CapsuleList capsules={capsules} />
+                </>
+              )}
+
+              {publicKey && capsules.length === 0 && hasBalance && (
+                <div className="flex flex-col items-center justify-center py-24 px-6 text-center">
+                  <div className="size-16 rounded-2xl bg-muted/50 flex items-center justify-center ring-1 ring-white/[0.04] mb-5">
+                    <LockKey weight="light" className="size-7 text-muted-foreground/40" />
                   </div>
-                )}
-
-                {capsules.length > 0 && (
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>{capsules.length} capsule{capsules.length !== 1 ? 's' : ''}</span>
-                    <span className="text-border">|</span>
-                    <span>{totalLocked.toFixed(2)} XLM locked</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {publicKey && <CreateCapsule publicKey={publicKey} onCapsuleCreated={handleCapsuleCreated} onBalanceRefresh={fetchBalance} />}
-
-        {publicKey && capsules.length > 0 && (
-          <>
-            <Separator className="bg-primary/10" />
-            <CapsuleList capsules={capsules} />
-          </>
-        )}
-
-        {publicKey && capsules.length === 0 && hasBalance && (
-          <div className="text-center py-16 space-y-3 fade-in">
-            <svg className="h-16 w-16 mx-auto text-muted-foreground/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={0.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-            <p className="text-muted-foreground">No time capsules yet</p>
-            <p className="text-sm text-muted-foreground/60">Create your first capsule above to seal XLM in time</p>
+                  <p className="text-sm text-muted-foreground mb-1">No time capsules yet</p>
+                  <p className="text-xs text-muted-foreground/50 max-w-xs">
+                    Create your first capsule to seal XLM with a message for the future
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        )}
-
-        <div className="pb-8" />
+        </div>
       </div>
     </div>
   );
