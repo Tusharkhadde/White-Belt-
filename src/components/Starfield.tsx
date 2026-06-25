@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
@@ -7,7 +7,7 @@ gsap.registerPlugin(useGSAP);
 export default function Starfield() {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const stars = useMemo(() =>
+  const [stars] = useState(() =>
     Array.from({ length: 80 }, (_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
@@ -15,16 +15,16 @@ export default function Starfield() {
       size: Math.random() * 2 + 1,
       duration: Math.random() * 3 + 2,
       delay: Math.random() * 5,
-    })), []
+    }))
   );
 
-  const shootingStars = useMemo(() =>
+  const [shootingStars] = useState(() =>
     Array.from({ length: 3 }, (_, i) => ({
       id: i,
       top: `${Math.random() * 30}%`,
       left: `${Math.random() * 100}%`,
       delay: Math.random() * 10 + 5,
-    })), []
+    }))
   );
 
   useGSAP(() => {
